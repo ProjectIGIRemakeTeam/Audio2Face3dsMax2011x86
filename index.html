@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3ds Max Plugin Integration with NVIDIA ACE & Audio2Face</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 40px;
+            max-width: 900px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #2c3e50;
+        }
+
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        img {
+            height: 50px;
+            /* Sets the height of both images */
+            width: auto;
+            /* Keeps the aspect ratio */
+        }
+    </style>
+</head>
+
+<body>
+    <img src="./docker-nvidia-3dsmax2011.png" />
+    <h1>3ds Max Plugin Integration with NVIDIA ACE & Audio2Face</h1>
+
+    <p>This guide provides a complete step-by-step installation and integration setup for connecting a 3ds Max plugin
+        with NVIDIA ACE and Audio2Face (A2F) using Docker and gRPC.</p>
+
+    <h2>High-Level Workflow</h2>
+    <ul>
+        <li><strong>audio2face 3dsMax2011 Plugin</strong> → Sends audio, face mesh, and emotion parameters to A2F
+            Controller via gRPC
+            (port 52000).</li>
+        <li><strong>A2F Controller</strong> → Passes data to Audio2Face (port 50000).</li>
+        <li><strong>Audio2Face</strong> → Processes the audio, generates blendshapes, and sends results back to the A2F
+            Controller (port 51000).</li>
+        <li><strong>A2F Controller</strong> → Returns processed animation data to the 3ds Max plugin.</li>
+        <li><strong>audio2face 3dsMax2011 Plugin</strong> → Stores animation as keyframes, syncing with the 3ds Max
+            timeline and
+            playing audio with the animation.</li>
+        <li><strong>FaceFX 3dsMax2011 Plugin</strong> → Exports the animation in <code>.fxa</code> format.</li>
+    </ul>
+
+    <h2>Setting Up the Environment</h2>
+
+    <h3>Step 1: Install & Configure Docker on Windows</h3>
+    <ol>
+        <li>Download & Install <a href="https://www.docker.com/products/docker-desktop" target="_blank">Docker
+                Desktop</a>.</li>
+        <li>Enable "Use the WSL 2 based engine" during installation and restart Docker.</li>
+    </ol>
+
+    <h3>Step 2: Install WSL2 & Ubuntu</h3>
+    <pre><code>wsl --install
+wsl --set-default-version 2</code></pre>
+    <p>Then, open Ubuntu and update packages:</p>
+    <pre><code>sudo apt update && sudo apt upgrade -y</code></pre>
+
+    <h3>Step 3: Install NVIDIA Drivers & Container Toolkit</h3>
+    <p>Check NVIDIA Driver Version:</p>
+    <pre><code>nvidia-smi</code></pre>
+    <p>If missing or outdated, install:</p>
+    <pre><code>sudo apt install nvidia-driver-535</code></pre>
+
+    <h4>Install NVIDIA Container Toolkit:</h4>
+    <pre><code>curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+sudo apt update
+sudo apt install -y nvidia-container-toolkit</code></pre>
+
+    <h2>Developing the 3ds Max Plugin</h2>
+
+    <h3>Step 1: MaxScript - Call Python</h3>
+    <p>The following MaxScript launches Python to send audio and face mesh data to A2F:</p>
+    <pre><code>global A2F_Client = "C:\\path\\to\\a2f_client.py"
+fn runA2F audioFile configYml ipPort = (
+    local cmd = "python \"" + A2F_Client + "\" \"" + audioFile + "\" \"" + configYml + "\" -u " + ipPort
+    shellLaunch "cmd.exe" ("/c " + cmd)
+    format "A2F Process Started... \n"
+)
+runA2F "C:\\path\\to\\audio.wav" "C:\\path\\to\\config.yml" "127.0.0.1:52000"</code></pre>
+
+    <h3>Step 2: Python - gRPC Client</h3>
+    <p>Install dependencies:</p>
+    <pre><code>pip install grpcio grpcio-tools numpy pandas</code></pre>
+
+    <p>Python gRPC Client:</p>
+    <pre><code>import grpc
+import csv
+import sys
+import os
+import a2f_pb2
+import a2f_pb2_grpc
+
+def send_audio(audio_file, config_file, ip_port):
+    # Validate input files
+    if not os.path.exists(audio_file):
+        print(f"Error: Audio file '{audio_file}' not found.")
+        return
+    if not os.path.exists(config_file):
+        print(f"Error: Config file '{config_file}' not found.")
+        return
+    
+    # Establish gRPC channel with timeout and error handling
+    try:
+        channel = grpc.insecure_channel(ip_port)
+        stub = a2f_pb2_grpc.A2FServiceStub(channel)
+    except grpc.RpcError as e:
+        print(f"gRPC Error: {e}")
+        return
+    
+    # Read audio file
+    try:
+        with open(audio_file, "rb") as f:
+            audio_data = f.read()
+    except Exception as e:
+        print(f"Error reading audio file: {e}")
+        return
+    
+    # Create request and send to A2F Controller
+    request = a2f_pb2.A2FRequest(audio=audio_data, config=config_file)
+    
+    try:
+        response = stub.ProcessAudio(request, timeout=10)  # 10s timeout
+    except grpc.RpcError as e:
+        print(f"gRPC Processing Error: {e}")
+        return
+    
+    # Ensure output directory exists
+    output_csv = "C:\\path\\to\\output_keyframes.csv"
+    os.makedirs(os.path.dirname(output_csv), exist_ok=True)
+    
+    # Save keyframes to CSV
+    try:
+        with open(output_csv, "w", newline="") as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(["frame", "blendshape", "value"])
+            for frame in response.keyframes:
+                writer.writerow([frame.time, frame.name, frame.value])
+        print(f"Keyframes saved to {output_csv}")
+    except Exception as e:
+        print(f"Error writing CSV: {e}")
+    
+if __name__ == "__main__":
+    if len(sys.argv) != 4:
+        print("Usage: python client.py &lt;audio_file&gt; &lt;config_file&gt; &lt;ip:port&gt;")
+    else:
+        send_audio(sys.argv[1], sys.argv[2], sys.argv[3])
+</code></pre>
+
+    <h3>Step 3: MaxScript - Apply Keyframes</h3>
+    <p>Apply received keyframes to the 3D model:</p>
+    <pre><code>fn applyKeyframes csvFile = (
+    local f = openFile csvFile
+    while not eof f do (
+        local line = readDelimitedString f ","
+        local frameNum = line[1] as integer
+        local blendshapeName = line[2] as string
+        local value = line[3] as float
+
+        local target = $FaceMesh.modifiers[#Morpher]
+        if target != undefined do (
+            local channelIndex = findItem target.channelNames blendshapeName
+            if channelIndex > 0 do (
+                at time frameNum target[blendshapeName].value = value
+            )
+        )
+    )
+    close f
+    format "Keyframes Applied! \n"
+)
+applyKeyframes "C:\\path\\to\\output_keyframes.csv"</code></pre>
+
+    <h2>Summary</h2>
+    <ul>
+        <li><strong>MaxScript</strong> launches Python to send audio & face mesh data to A2F.</li>
+        <li><strong>Python gRPC Client</strong> sends the data and receives blendshape keyframes.</li>
+        <li><strong>MaxScript</strong> applies the received keyframes to the 3D model in 3ds Max.</li>
+    </ul>
+
+    <p>This setup automates facial animation in 3ds Max using NVIDIA ACE & Audio2Face! 🎭</p>
+
+</body>
+
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ac_a2f_config.yaml</title>
+</head>
+
+<body>
+    <details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3" open="">
+        <summary class="sd-summary-title sd-card-header">
+            ac_a2f_config.yaml
+        </summary>
+        <div class="sd-summary-content sd-card-body docutils">
+            <div class="highlight-yaml notranslate">
+                <div class="highlight">
+                    <pre><span></span><span class="nt">audio2face</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># Url to reach Audio2Face</span><span class="w"></span>
+<span class="w">  </span><span class="nt">send-audio</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">ip</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0.0.0</span><span class="w"></span>
+<span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50000</span><span class="w"></span>
+<span class="w">  </span><span class="nt">receive-anim-data</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># Port where to open a server to receive the animation data from A2F</span><span class="w"></span>
+<span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">51000</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># Maximum amount of time that A2F Controller will wait when not</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># receiving data from A2F, before cutting the connection</span><span class="w"></span>
+<span class="w">    </span><span class="nt">max_wait_time_idle_ms</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30000</span><span class="w"></span>
+
+<span class="nt">public-interface</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># port exposed publicly to the outside of the cluster</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># The provided python app connects to it</span><span class="w"></span>
+<span class="w">  </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">52000</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># Maximum number of connected users</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># We advise to use the same number as for A2F config</span><span class="w"></span>
+<span class="w">  </span><span class="nt">max-user-number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+
+<span class="nt">common</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># Maximum amount in second for the processing time</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># After this timeout the connection to A2F will be cut</span><span class="w"></span>
+<span class="w">  </span><span class="nt">max_processing_duration_second</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">300</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># Maximum size of 1 audio buffer sent over the grpc stream</span><span class="w"></span>
+<span class="w">  </span><span class="nt">max_audio_buffer_size_second</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># Maximum size of the audio clip to process</span><span class="w"></span>
+<span class="w">  </span><span class="nt">max_audio_clip_size_second</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">300</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># Maximum allowed Samplerate</span><span class="w"></span>
+<span class="w">  </span><span class="nt">max_sample_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">144000</span><span class="w"> </span><span class="c1"># 144kHz</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># How often should FPS logs be printed per stream</span><span class="w"></span>
+<span class="w">  </span><span class="nt">fps_logging_interval_second</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">  </span><span class="nt">garbage_collector</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># enable or disable the garbage collector</span><span class="w"></span>
+<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># how often the garbage collector should run</span><span class="w"></span>
+<span class="w">    </span><span class="nt">interval_run_second</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># If the garbage collector finds streams holding</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># more than N seconds of data, it will delete data</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># until the amount falls below this threshold.</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># Clients are expected to retrieve data promptly so that</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># the service doesn't retain the data excessively.</span><span class="w"></span>
+<span class="w">    </span><span class="nt">max_size_stored_data_second</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">60</span><span class="w"></span>
+</pre>
+                </div>
+            </div>
+        </div>
+    </details>
+</body>
+
+</html>

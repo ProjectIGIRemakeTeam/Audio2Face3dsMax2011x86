@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creating a 3ds Max plugin</title>
+</head>
+
+<body>
+    <div itemscope="" itemtype="http://schema.org/BlogPosting" class="blog-post ng-scope">
+        <!-- ngIf: $state.current.data.edit -->
+        <div class="blog-post__content">
+
+            <h1 ng-if="!$state.current.data.edit" ng-bind="blog_post_ctrl.post.title" itemprop="headline"
+                class="blog-post__title ng-binding ng-scope">Creating a 3ds Max plugin</h1>
+            <!-- end ngIf: !$state.current.data.edit --><!-- ngIf: $state.current.data.edit --><!-- ngIf: !$state.current.data.edit -->
+
+            <!-- end ngIf: !$state.current.data.edit --><!-- ngIf: $state.current.data.edit --><!-- ngIf: !$state.current.data.edit -->
+            <div ng-if="!$state.current.data.edit" ng-bind-html="blog_post_ctrl.page.text | postWrapper "
+                itemprop="articleBody" class="blog-post__text ng-binding ng-scope">
+                <div>
+                    <h2>Introduction</h2>
+                    <p>The lesson discusses the 3ds Max plugin processing technology chain in the Microsoft Visual
+                        Studio
+                        environment with the use of 3ds Max SDK and C++ programming language. The MAXScript version of
+                        the
+                        plugin is also implemented. The material provided is only the starting point on the way of
+                        mastering
+                        the development technique of 3ds Max SDK-plagin.
+                        <br>The lesson was prepared on the applications of users Render.ru.
+                    </p>
+                    <p><em>A plugin</em> is a software module connected to the main program and either implementing part
+                        of
+                        the functionality of the main program or expanding its capabilities.
+                        <br>So, in 3ds Max, the first group of plugins includes standard plugins stored in the stdplugs
+                        folder and downloaded when starting the application. Their list is displayed in the Plug-in
+                        Manager
+                        dialog 1) in Figure 1) of the Plug-in Manager diagram.
+                    </p>
+                    <img alt="" src="https://st.renderu.com/image/48533"
+                        style="height: initial; max-height: 227px; clear: both; margin-left: auto; margin-right: auto;">
+                    <p>Rice. 1. Plug-in Manager</p>
+                    <p>These plugins, there are about 350, implement a significant part of the 3ds Max functionality.
+                        For
+                        example, the prim.dlo plugin provides the creation of standard primitives, splines and standard
+                        light sources.
+                        <br>Other, non-standard plugins are preferable to place in other folders and download as needed.
+                        <br>3ds Max SDK (Solution Development Kit) is available in the professional version of 3ds Max
+                        and
+                        contains header and library files that provide access to classes and other 3ds Max data. In
+                        addition, there is a helper and a large number of examples in the package.
+                        <br>The 3ds Max plugin can be written in the MAXScript language and in C++ with 3ds Max SSDK.
+                        <br>In the first case, the plugin is created in the 3ds Max environment, and in the second - in
+                        the
+                        Microsoft Visual Studio environment.
+                        <br>In many cases, MAXScript can provide the same functionality as SDK. However, the speed of
+                        SDK
+                        plugins is higher.
+                        <br>SDK plugin is a compiled and assembled dll-filled C++ (DL, Dynamic Linked Library,
+                        dynamically
+                        connected library). The recommended file extension depends on the purpose of the plugin. In the
+                        standard delivery of 3ds Max, plugins operating materials and their maps have an extension of
+                        the
+                        DLT, and the plugins creating objects are given the DLO extension, the modifier plugins are
+                        highlighted by the DLM extension and so on.
+                        <br>Delivery of 3ds Max SDK includes a Plug-in Wizard plugin creation assistant. It supports (or
+                        plans to support) the creation of about the following 40 types of plugins (the standard
+                        extension is
+                        indicated in brackets):
+                    </p>
+                    <ul>
+                        <li>Anti-Aliasing Filters – filters that smooth out the image (DLK); </li>
+                        <li>Atmospheric – atmospheric effects (DLV); </li>
+                        <li>Cameras – cameras (DLO); </li>
+                        <li>Color Selector – Choice of Color (DLU); </li>
+                        <li>Construction Grid Objects – creation of grid objects (DLO); </li>
+                        <li>Controllers – controllers (control elements, DLC); </li>
+                        <li>File Export, File Import and File List – Export, Import and List of Files (DLE, DLI); </li>
+                        <li>Global Utility Plug-Ins – Global Utilities (GUP); </li>
+                        <li>Helper Objects – assistants (DLO); </li>
+                        <li>IK Solvers – inverse kinematic solvers (DLC); </li>
+                        <li>Image Filter / Compositor - filters (editors) of images (FLT); </li>
+                        <li>Image Loader / Saver – Download and Preservation of Images (BMI); </li>
+                        <li>Image Viewer – viewing images (DLF); </li>
+                        <li>Lights – light sources (DLO); </li>
+                        <li>Manipulators – manipulators (DLO); </li>
+                        <li>Materials – materials (DLT); </li>
+                        <li>Modifiers – modifiers (DLM); </li>
+                        <li>NURBS Objects – Heterogeneous rational spalines Bézier (DLO); </li>
+                        <li>Particle Systems / Effects - Particle Systems and Particle-Based Effects (DLO); </li>
+                        <li>Patch Objects – patches (piece objects, DLO); </li>
+                        <li>Procedural Objects - procedural objects, such as standard primitives (DLO); </li>
+                        <li>Renderer – image playback (DLR); </li>
+                        <li>Rendering Effects – effects in image playback (DLV); </li>
+                        <li>Samplers – samples (DLH); </li>
+                        <li>Shaders – shaders (determine the color characteristics of the object, DLB); </li>
+                        <li>Shadow Generator – Shadow Generators (DLO); </li>
+                        <li>Skin Deformer Gizmo – skin modifier containers (DLM); </li>
+                        <li>Sound Plug-ins – sounds (DLO); </li>
+                        <li>Space Warps – spatial deformations (DLM); </li>
+                        <li>Textures 2D, Textures 3D – two-dimensional and three-dimensional textures (DLT); </li>
+                        <li>Track View Utility – utilities of the tracks (DLU); </li>
+                        <li>Utility – utilities (DLU). </li>
+                    </ul>
+                    <p>After clarifying the task, writing an SDK plagin usually involves the creation of an appropriate
+                        user
+                        interface and the implementation of the planned procedures. For example, the gSphere.dlo plugin
+                        provides the interface given in Figure 2 and software supports the corresponding application
+                        reaction to the interface actions.</p>
+                    <img alt="" src="https://st.renderu.com/image/48534"
+                        style="height: initial; max-height: 436px; clear: both; margin-left: auto; margin-right: auto;">
+                    <p>Rice. 2. User interface of the plugin gSphere.dlo</p>
+                    <p>When developing SDK plugins, each version of 3ds Max involves using the corresponding version of
+                        Microsoft Visual Studio, as reflected in the following table:</p>
+                    <table border="1">
+                        <tbody>
+                            <tr>
+                                <th> Version 3ds Max</th>
+                                <th> Operating system
+                                    <br>(32 and 64 bits)
+                                </th>
+                                <th> Compatible versions
+                                    <br>3ds Max SDK
+                                </th>
+                                <th> Microsoft Visual C++
+                                    <br>Compiler version
+                                </th>
+                            </tr>
+                            <tr>
+                                <td>2011</td>
+                                <td>Windows 7
+                                    <br>Windows Vista
+                                    <br>Windows XP Pro SP2
+                                </td>
+                                <td>2011, 2010</td>
+                                <td>Visual C++ 9.0 (Visual Studio 2008) Service Pack 1
+                                    <br>with installed on 28 July 2009 security patch
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2010</td>
+                                <td>Windows Vista
+                                    <br>Windows XP Pro SP2
+                                </td>
+                                <td>2010</td>
+                                <td>Visual C++ 9.0 (Visual Studio 2008) Service Pack 1</td>
+                            </tr>
+                            <tr>
+                                <td>2009</td>
+                                <td>Windows Vista
+                                    <br>Windows XP Pro SP2
+                                </td>
+                                <td>2009</td>
+                                <td>Visual C++ 8.0 (Visual Studio 2005) Service Pack 1</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p>&nbsp;</p>
+                    <h2>Setting the task</h2>
+                    <p>The procedure for developing the plugin will be considered by the following example: create a
+                        plugin
+                        that forms a cube primitive cube (Cube).
+                        <br>Such a simple object meets the purpose of the lesson, which is to demonstrate the
+                        technological
+                        chain of SDK plugins.
+                        <br>Primitive has one Size parameter, for which the editable field with the counter is used. 3).
+                    </p>
+                    <img alt="" src="https://st.renderu.com/image/48535"
+                        style="height: initial; max-height: 282px; clear: both; margin-left: auto; margin-right: auto;">
+                    <p>Rice. 3. Cube plugin interface</p>
+                    <p>Like other primitives, the cube is inserted into the scene with a mouse pressed left button.</p>
+                    <h2>MAXScript plugin implementation</h2>
+                    <p>The same problem can be solved by 3ds Max SDK and MAXScript. To illustrate this provision, we
+                        implement first the plugin for creating a cube on MAXScript, giving the plugin the name CubeMS.
+                    </p>
+                    <code>plugin simpleObject CubeMS name:"CubeMS" classID:#(145340, 543210) category:"Scripted Primitives" (<br>
+&nbsp;parameters main rollout:params (<br>
+&nbsp;&nbsp;size type:#worldUnits ui:size default:0<br>
+&nbsp;)<br>
+&nbsp;rollout params "Cube Size" (<br>
+&nbsp;&nbsp;spinner size "Size: " type:#worldunits range:[0, 100, 0] scale:1<br>
+&nbsp;)<br>
+&nbsp;on buildMesh do (<br>
+&nbsp;&nbsp;h = 0.5 * size<br>
+&nbsp;&nbsp;arrVrts = #([-h, -h, -h], [h, -h, -h], [-h, h, -h], [h, h, -h], \<br>
+&nbsp;&nbsp;&nbsp;[-h, -h, h], [h, -h, h], [-h, h, h], [h, h, h])<br>
+&nbsp;&nbsp;arrFcs = #([1, 3, 4], [4, 2, 1], [5, 6, 8], [8, 7, 5], \<br>
+&nbsp;&nbsp;&nbsp;[1, 2, 6], [6, 5, 1], [2, 4, 8], [8, 6, 2], \<br>
+&nbsp;&nbsp;&nbsp;[4, 3, 7], [7, 8, 4], [3, 1, 5], [5, 7, 3])<br>
+&nbsp;&nbsp;setMesh mesh verts:arrVrts faces:arrFcs<br>
+&nbsp;&nbsp;setFaceSmoothGroup mesh 1 2; setFaceNormal mesh 1 [0, 0, -1]<br>
+&nbsp;&nbsp;setFaceSmoothGroup mesh 2 2; setFaceNormal mesh 2 [0, 0, -1]<br>
+&nbsp;&nbsp;setFaceSmoothGroup mesh 3 4; setFaceNormal mesh 3 [0, 0, 1]<br>
+&nbsp;&nbsp;setFaceSmoothGroup mesh 4 4; setFaceNormal mesh 4 [0, 0, 1]<br>
+&nbsp;&nbsp;setFaceSmoothGroup mesh 5 8; setFaceNormal mesh 5 [0, -1, 0]<br>
+&nbsp;&nbsp;setFaceSmoothGroup mesh 6 8; setFaceNormal mesh 6 [0, -1, 0]<br>
+&nbsp;&nbsp;setFaceSmoothGroup mesh 7 16; setFaceNormal mesh 7 [1, 0, 0]<br>
+&nbsp;&nbsp;setFaceSmoothGroup mesh 8 16; setFaceNormal mesh 8 [1, 0, 0]<br>
+&nbsp;&nbsp;setFaceSmoothGroup mesh 9 32; setFaceNormal mesh 9 [0, 1, 0]<br>
+&nbsp;&nbsp;setFaceSmoothGroup mesh 10 32; setFaceNormal mesh 10 [0, 1, 0]<br>
+&nbsp;&nbsp;setFaceSmoothGroup mesh 11 64; setFaceNormal mesh 11 [-1, 0, 0]<br>
+&nbsp;&nbsp;setFaceSmoothGroup mesh 12 64; setFaceNormal mesh 12 [-1, 0, 0]<br>
+&nbsp;&nbsp;for k = 1 to 12 do setEdgeVis mesh k 3 false<br>
+&nbsp;)<br>
+&nbsp;tool create (<br>
+&nbsp;&nbsp;on mousePoint click do<br>
+&nbsp;&nbsp;&nbsp;case click of (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;1: nodeTM.Translation = gridPoint<br>
+&nbsp;&nbsp;&nbsp;&nbsp;3: #stop<br>
+&nbsp;&nbsp;&nbsp;)<br>
+&nbsp;&nbsp;on mouseMove click do<br>
+&nbsp;&nbsp;&nbsp;case click of (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;2: size = amax gridDist.X gridDist.Y<br>
+&nbsp;&nbsp;&nbsp;&nbsp;3: size = gridDist.Z<br>
+&nbsp;&nbsp;&nbsp;)<br>
+&nbsp;)<br>
+)</code>
+                    <p>The program contains a section (Rollout) params that provides a cube size task (Size counter).
+                        The
+                        value of the meter is associated with the parameter of the same name given in the Parameters
+                        block.
+                        <br>The cube (a mouse) tool is set by the Tool Create unit. After selecting the position (the
+                        mousePoint event with click = 1), the part of the Translation (movement) of the cube affinity
+                        matrix
+                        (nodeTM.Translation = gridPoint) is determined. Further, with the left mouse button pressed, its
+                        movement in the port is fixed; the size of the movement determines the size of the cube.
+                        <br>After the release of the mouse, the scene can take another cube.
+                        <br>The parent class of the cube is the SimpleObject class. The class of the cube is called
+                        CubeMS.
+                        <br>To obtain a classID class identifier, you should use the available in the folder ..
+                        \Autodesk\3ds Max 20x SDK\maxsdk\help program gencid.exe (pic. 4).
+                    </p>
+                    <img alt="" src="https://st.renderu.com/image/48536"
+                        style="height: initial; max-height: 143px; clear: both; margin-left: auto; margin-right: auto;">
+                    <p>Rice. 4. Plugin class identifier generator</p>
+                    <p>The parametrized cube is created by the buildMesh processor as a result of the SetMesh method,
+                        which
+                        receives an array of arVrts with the coordinates of the vertice of the primitive and the array
+                        of
+                        its arrFcs faces. The size of the cube is determined by the value of the Size parameter.
+                        Smoothing
+                        groups and the cube's normal are set by analogy with the Box Primitive.
+                        <br>After copying and running code in MAXScript Editor, the plugin will be available on the
+                        Create –
+                        Geometry – Scripted Primitives tab. 5).
+                    </p>
+                    <img alt="" src="https://st.renderu.com/image/48537"
+                        style="height: initial; max-height: 265px; clear: both; margin-left: auto; margin-right: auto;">
+                    <p>Rice. 5. Calling the CubeMS plugin</p>
+                    <p>Category (Scripted Primitives) and the position of the element in the command window are
+                        determined
+                        by the parameters of the Plugin expression. So, the SimpleObject class indicates the affiliation
+                        of
+                        the primitive to geometric objects, the purpose of the ship of the ship of the graph.
+                        <br>After downloading the plugin with a cube, you can operate with the means of the MAXScript
+                        language, for example:
+                    </p>
+                    <code>delete $*<br>
+cb = cubeMS size:40<br>
+animate on at time 100 (<br>
+&nbsp;cb.Size = 60<br>
+&nbsp;rotate cb 360 [0, 0, 1]<br>
+)<br>
+playAnimation() </code>
+                    <p>Note that the created object has no textured coordinates, so when using the material, you should
+                        take
+                        care of creating such coordinates, for example, using the UVWmap modifier:</p>
+                    <code>delete $*<br>
+cb = cubeMS size:50<br>
+addModifier cb (UVWmap maptype:4 ui:on)<br>
+chk = checker()<br>
+chk.Coordinates.U_Tiling = chk.Coordinates.V_Tiling = 2<br>
+std = standard diffuseMap:chk showInViewport:true diffuseMapEnable:true<br>
+cb.Material = std </code>
+                    <h2>Setting up Plug-in Wizard Assistant</h2>
+                    <p>The files required for use of the assistant are located in the MAXSDK\Howtto\3DSMaxPluginWizard
+                        folder.
+                        <br>Let's open the 3dsmaxluginWizard.vsz file in this folder in this folder and determine the
+                        following parameter value in it:
+                    </p>
+                    <p>Param="ABSOLUTE_PATH = C:\Program Files\Autodesk\3ds Max 2009 SDK\maxsdk\how\3dsmaxPluginWizard"
+                    </p>
+                    <p>That is, we will indicate the full way to the folder with the helpee files. Save the changes and
+                        close the file.
+                        <br>By staying in this folder, copy the following three files:
+                    </p>
+                    <ul>
+                        <li>3dsmaxPluginWizard.ico; </li>
+                        <li>3dsmaxPluginWizard.vsdir; </li>
+                        <li>3dsmaxPluginWizard.vsz </li>
+                    </ul>
+                    <p>and insert them into VC/vcprojects the directory of installing Microsoft Visual Studio (this can
+                        be
+                        C:\Program Files\Microsoft Visual Studio 5\VC\vcprojects).
+                        <br>This is enough to 3ds Max Plug-in Wizard prove to be available as a template in Microsoft
+                        Visual
+                        Studio.
+                        <br>Check this by running Visual Studio and choosing File &gt; New:Projects &gt; Visual C++ &gt;
+                        3ds
+                        Max Plug-in Wizard. 6).
+                    </p>
+                    <img alt="" src="https://st.renderu.com/image/48538"
+                        style="height: initial; max-height: 344px; clear: both; margin-left: auto; margin-right: auto;">
+                    <p>Rice. 6. Creating a Visual C++ project with 3ds Max Plug-in Wizard</p>
+                    <h2>The procedure for creating 3ds Max SDK-plagin</h2>
+                    <p>After the development of the plugin project and design of the project, for example, in the form
+                        of a
+                        technical task, Microsoft Visual Studio is launched, where all subsequent actions are performed.
+                        <br>In the SDK-plagin project, it is useful to specify the following characteristics:
+                    </p>
+                    <table border="1">
+                        <tbody>
+                            <tr>
+                                <th> Characteristics of the plugin <br>
+                                </th>
+                                <th> Example of meaning </th>
+                            </tr>
+                            <tr>
+                                <td>File name</td>
+                                <td>cube.dlo</td>
+                            </tr>
+                            <tr>
+                                <td>Utilities Class Identifier</td>
+                                <td>Class_ID(0xd667c5aa, 0xb65e9ddb)</td>
+                            </tr>
+                            <tr>
+                                <td>Description IDS_LIBDESCRIPTION</td>
+                                <td>"Cube"</td>
+                            </tr>
+                            <tr>
+                                <td>Category IDS_CATEGORY</td>
+                                <td>"SDK simple object"</td>
+                            </tr>
+                            <tr>
+                                <td>Class name IDS_CLASS_NAME</td>
+                                <td>"Cube"</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p>The user interface provided by the plugin will be formed in accordance with Fig. 7, adding the
+                        possibility of manual input (Keyboard Entry) of the Cube primitive.</p>
+                    <img alt="" src="https://st.renderu.com/image/48539"
+                        style="height: initial; max-height: 381px; clear: both; margin-left: auto; margin-right: auto;">
+                    <p>Rice. 7. Clarified plugin user interface</p>
+                    <p>When you enter by pressing the Create button, the center of the cube will be placed at the
+                        beginning
+                        of the world coordinate system.
+                        <br>We will now create a C++ Win32 project at Microsoft Visual Studio, the compilation and
+                        assembly
+                        of which (Compile and Link) will ensure the creation of the requested plugin.
+                        <br>The project is created as a multi-ton library (Multy-threaded DLL). Hybrid is used, suitable
+                        for
+                        debugging and for the construction of a ready-made solution (Solution).
+                    </p>
+                    <h2>Creation of a new project</h2>
+                    <p>Run Visual Studio and use 3ds Max Plug-in Wizard assistant to create a project. 6). In the Name
+                        field, we enter the name Cube, and in the Location field we will specify, for example, the name
+                        of
+                        the folder C:\sdk. Take the Set Directory for Solution check box. Click on OK and in the open
+                        dialog
+                        we will select Proceedural Objects (procedural objects, fig. 8).</p>
+                    <img alt="" src="https://st.renderu.com/image/48540"
+                        style="height: initial; max-height: 330px; clear: both; margin-left: auto; margin-right: auto;">
+                    <p>Rice. 8. Selection of type of plugin</p>
+                    <p>Click on the Next and enter in the dialog that appears on the figures 9 values.</p>
+                    <img alt="" src="https://st.renderu.com/image/48541"
+                        style="height: initial; max-height: 178px; clear: both; margin-left: auto; margin-right: auto;">
+                    <p>Rice. 9. Detailed description of the Cube plugin. As the basic class is chosen SimpleObject2</p>
+                    <p>Click on the Next and in the dialog that appears, we will check the presence of the values
+                        specified
+                        in Figure 10.</p>
+                    <img alt="" src="https://st.renderu.com/image/48542"
+                        style="height: initial; max-height: 137px; clear: both; margin-left: auto; margin-right: auto;">
+                    <p>Rice. 10. Some details of the project</p>
+                    <p>In the MAXSDK path field indicated the path</p>
+                    <p>C:\Program Files\Autodesk\3ds Max 9 SDK\maxsdk</p>
+                    <p>a in the field 3dsmax.exe path indicated the path</p>
+                    <p>C:\Program Files\Autodesk\3ds Max 2009</p>
+                    <p>Your values may be different.
+                        <br>Click on the Finish button.
+                    </p>
+                    <h2>Properties of the Cube project</h2>
+                    <p>Almost all the properties of the Cube project will be set by the assistant. Our task is to review
+                        these properties and make minor adjustments.
+                        <br>On the Solution Explorer tab will be located a solution tree (Fig. 11).
+                    </p>
+                    <img alt="" src="https://st.renderu.com/image/48543"
+                        style="height: initial; max-height: 192px; clear: both; margin-left: auto; margin-right: auto;">
+                    <p>Rice. 11. Cube Solution Tree</p>
+                    <p>The first 3dsmaxsdk_preinclude.h heading file is deleted, and the cube.h file is given to the
+                        following form:</p>
+                    <code>#include "Max.h"<br>
+#include "resource.h"<br>
+#include "istdplug.h"<br>
+#include "iparamb2.h"<br>
+#include "iparamm2.h"<br>
+#include "Simpobj.h"<br>
+extern TCHAR *GetString(int id);<br>
+extern HINSTANCE hInstance; </code>
+                    <p>Deleting the 3dsmaxsdk_preinclude file will require the withdrawal of all #pragma message from
+                        the
+                        cube.cp.p. Such pieces of code will appear in the file if you choose GeomObject as the base
+                        class.
+                        <br>Let's add the Hybrid configuration to the project.
+                        <br>We select the cube pin in the project tree (see Figure 11), click on the right mouse button
+                        and
+                        in the menu that appears, choose Properties.
+                        <br>In the window that opens, click on the Configuration Manager button and in the Active
+                        Solution
+                        Configuration list, we will add a new look of the Hybrid configuration; we select the same view
+                        in
+                        the following dialog table. 12).
+                    </p>
+                    <img alt="" src="https://st.renderu.com/image/48544"
+                        style="height: initial; max-height: 157px; clear: both; margin-left: auto; margin-right: auto;">
+                    <p>Rice. 12. Adding Hybrid Configuration</p>
+                    <p>Next, all settings will be made for this configuration.
+                        <br>The Configuration Properties-General branch after the changes will contain the following
+                        information. 13):
+                    </p>
+                    <img alt="" src="https://st.renderu.com/image/48545"
+                        style="height: initial; max-height: 188px; clear: both; margin-left: auto; margin-right: auto;">
+                    <p>Rice. 13. Configuration Properties – General</p>
+                    <p>Move to the C++ branch – General. In the field of Additional Include Directories, we will check
+                        the
+                        way to the association directory 3ds Max SDK:</p>
+                    <p>"C:\Program Files\Autodesk\3ds Max 2009 SDK\maxsdk\include"</p>
+                    <p>In your case, the path may be different. If the path contains spaces, then it should be put in
+                        quotes.
+                        <br>We will leave the other field of dialogue unchanged. Click on the button.
+                        <br>In the C++- Command Line branch field Additional options (additional options) insert the
+                        following values:
+                    </p>
+                    <p>/GR /we4706 /we4390 /we4557 /we454546 /we44595 /we430 /we430 /we411 /we421 /w34701 /wd4244
+                        /wd4018
+                    </p>
+                    <p>They are taken from the AdditionalCompilerOptions.txt file available in the supply of 3ds Max
+                        SDK.
+                        Apply.
+                        <br>The name of the output file (created plugin) will be found in the Linker branch – General –
+                        Output File. In the example in question, the assistant indicated the name C:\sdk\cube.dlo.
+                        <br>Check the way to SDK libraries (Additional Library Directories):
+                    </p>
+                    <p>"C:\Program Files\Autodesk\3ds Max 2009 SDK\max sdk\lib"</p>
+                    <p>If the path has gaps, then it should be put in quotes. Apply.
+                        <br>We will leave the other values of the project properties unchanged.
+                    </p>
+                    <h2>Resource File cube.rc</h2>
+                    <p>In this file we will create the Keyboard Entry and Parameters speakers on the above figures.
+                        Also,
+                        edit the table of symbols (String Table) with resource identifiers.
+                        <br>Let’s go to Visual Studio to the Resource View tab. We open the IDD_PANEL dialogue prepared
+                        by
+                        the assistant, choose the form of the dialogue, in the properties window we change its
+                        identifier
+                        (the property of ID) to IDD_KBRD, and the form of the dialogue itself will lead to the next
+                        species.
+                        14):
+                    </p>
+                    <img alt="" src="https://st.renderu.com/image/48546"
+                        style="height: initial; max-height: 142px; clear: both; margin-left: auto; margin-right: auto;">
+                    <p>Rice. 14. Form of dialogue IDD_KBRD</p>
+                    <p>This dialogue will be used for manual commissioning of the primitive. Its size 108*63 units
+                        (pixel).
+                        <br>Properties (ID and Caption) of the existing elements (text, input field and counter) will be
+                        installed in accordance with Fig.
+                    </p>
+                    <img alt="" src="https://st.renderu.com/image/48547"
+                        style="height: initial; max-height: 250px; clear: both; margin-left: auto; margin-right: auto;">
+                    <p>Rice. 15. Properties of elements of dialogue IDD_KBRD</p>
+                    <p>Below these fields, add the CustButton class button (user class). This can be done by using the
+                        Custom Control tool and bringing the properties (Caption, Class, and Style) of the added element
+                        in
+                        accordance with the figure. 16.</p>
+                    <img alt="" src="https://st.renderu.com/image/48548"
+                        style="height: initial; max-height: 560px; clear: both; margin-left: auto; margin-right: auto;">
+                    <p>Rice. 16. Adding and configuring the Create button</p>
+                    <p>Let's now highlight in the tree of the cube.rc file IDD_KBRD, perform its copy and insert. Change
+                        the
+                        identifier of the added dialogue to IDD_PARAMS (Figures 17), and install its shape and
+                        properties of
+                        its elements in accordance with Fig. 18.</p>
+                    <img alt="" src="https://st.renderu.com/image/48549"
+                        style="height: initial; max-height: 187px; clear: both; margin-left: auto; margin-right: auto;">
+                    <p>Rice. 17. Added dialog IDD_PARAMS</p>
+                    <img alt="" src="https://st.renderu.com/image/48550"
+                        style="height: initial; max-height: 243px; clear: both; margin-left: auto; margin-right: auto;">
+                    <p>Rice. 18. Properties of elements of the IDD_PARAMS dialogue</p>
+                    <p>The IDD_PARAMS dialogue reflects the current value of the Size parameter and can be used in
+                        particular to change the size of the cube on the Modify tab.
+                        <br>Now open the table of symbols of the resource and bring it in line with rice. 19.
+                    </p>
+                    <img alt="" src="https://st.renderu.com/image/48551"
+                        style="height: initial; max-height: 107px; clear: both; margin-left: auto; margin-right: auto;">
+                    <p>Rice. 19. Table of symbols of the resource cube.rc</p>
+                    <p>The symbol table contains the content properties used by the plug-in (see the details below).
+                        <br>In resource dialogues, the following user controls are used:
+                    </p>
+                    <ul>
+                        <li>Custom Edit control class CustEdit; </li>
+                        <li>Custom Spinner Control of the SpinnerControl class; </li>
+                        <li>Custom Button control class CustButton. </li>
+                    </ul>
+                    <h2>Resource.h File</h2>
+                    <p>Save all the changes and make sure that this file contains, among others, the following data
+                        (identifiers values may be otherwise):</p>
+                    <table width="" cellspacing="" cellpadding="" border="0" align="" summary="">
+                        <tbody>
+                            <tr>
+                                <td>#define IDS_LIBDESCRIPTION</td>
+                                <td> 1</td>
+                            </tr>
+                            <tr>
+                                <td>#define IDS_CATEGORY</td>
+                                <td> 2</td>
+                            </tr>
+                            <tr>
+                                <td>#define IDS_CLASS_NAME</td>
+                                <td> 3</td>
+                            </tr>
+                            <tr>
+                                <td>#define IDS_KBRD</td>
+                                <td> 4</td>
+                            </tr>
+                            <tr>
+                                <td>#define IDS_PARAMS</td>
+                                <td> 5</td>
+                            </tr>
+                            <tr>
+                                <td>#define IDS_CB_SIZE</td>
+                                <td> 6</td>
+                            </tr>
+                            <tr>
+                                <td>#define IDD_PARAMS</td>
+                                <td> 101</td>
+                            </tr>
+                            <tr>
+                                <td>#define IDD_KBRD</td>
+                                <td> 102</td>
+                            </tr>
+                            <tr>
+                                <td>#define IDC_KBSZ</td>
+                                <td> 1001</td>
+                            </tr>
+                            <tr>
+                                <td>#define IDC_KBSZSPIN</td>
+                                <td> 1002</td>
+                            </tr>
+                            <tr>
+                                <td>#define IDC_KBSTATIC</td>
+                                <td> 1003</td>
+                            </tr>
+                            <tr>
+                                <td>#define IDC_CREATE</td>
+                                <td> 1004</td>
+                            </tr>
+                            <tr>
+                                <td>#define IDC_SZSTATIC</td>
+                                <td> 1005</td>
+                            </tr>
+                            <tr>
+                                <td>#define IDC_SZ</td>
+                                <td> 1490</td>
+                            </tr>
+                            <tr>
+                                <td>#define IDC_SZSPIN</td>
+                                <td> 1496</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p>In other words, the file must contain identifiers of the symbols and resource dialogs. Other
+                        definitions from the file can be deleted.</p>
+                    <h2>File code cube.rc</h2>
+                    <p>Let's go to the Solution Explorer tab and view the cube.rc file code (select the name cube.rc -
+                        right
+                        mouse button - View Code). The code should, among others, contain the following definitions:</p>
+                    <code>// Dialog<br>
+//<br>
+IDD_KBRD DIALOGEX 0, 0, 108, 63<br>
+STYLE DS_SETFONT | WS_CHILD | WS_VISIBLE<br>
+FONT 8, "MS Sans Serif", 0, 0, 0x0<br>
+BEGIN<br>
+<br>
+</code>
+                    <table border="0">
+                        <tbody>
+                            <tr>
+                                <td> CONTROL</td>
+                                <td> "",IDC_KBZ",CustEdit",WS_TABSTOP,43,17,35,10</td>
+                            </tr>
+                            <tr>
+                                <td> CONTROL</td>
+                                <td> "",IDC_KBSZSPIN",SpinnerControl",0x0,79,17,7,10</td>
+                            </tr>
+                            <tr>
+                                <td> LTEXT</td>
+                                <td> "Size",IBC_KBSTATIC,21,18,18,8</td>
+                            </tr>
+                            <tr>
+                                <td> CONTROL</td>
+                                <td> "Create",IDC_CREATE",CustButton",WS_TABSTOP,31,36,44,12</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <br>
+                    END<br>
+                    IDD_PARAMS DIALOGEX 0, 0, 108, 48<br>
+                    STYLE DS_SETFONT | WS_CHILD | WS_VISIBLE<br>
+                    FONT 8, "MS Sans Serif", 0, 0, 0x0<br>
+                    BEGIN<br>
+                    <br>
+                    <table border="0">
+                        <tbody>
+                            <tr>
+                                <td> CONTROL</td>
+                                <td> "",IDC_SZ",CustEdit",WS_TABSTOP,43,17,35,10</td>
+                            </tr>
+                            <tr>
+                                <td> CONTROL</td>
+                                <td> "",IDC_SZSPIN",SpinnerControl",0x0,79,79,17,7,10</td>
+                            </tr>
+                            <tr>
+                                <td> LTEXT</td>
+                                <td> "Size",IDC_SZSTATIC,21,18,14,8</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <br>
+                    END<br>
+                    <br>
+                    ...<br>
+                    // String Table<br>
+                    //<br>
+                    STREMENTTABLE <br>
+                    BEGIN<br>
+                    <br>
+                    <table border="0">
+                        <tbody>
+                            <tr>
+                                <td> IDS_LIBDESCRIPTION</td>
+                                <td> "Cube"</td>
+                            </tr>
+                            <tr>
+                                <td> IDS_CATEGORY</td>
+                                <td> "SDK simple object"</td>
+                            </tr>
+                            <tr>
+                                <td> IDS_CLASS_NAME</td>
+                                <td> "Cube"</td>
+                            </tr>
+                            <tr>
+                                <td> IDS_KBRD</td>
+                                <td> "Keyboard Entry"</td>
+                            </tr>
+                            <tr>
+                                <td> IDS_PARAMMS</td>
+                                <td> "Parameters"</td>
+                            </tr>
+                            <tr>
+                                <td> IDS_CB_SIZE</td>
+                                <td> "Size"</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <br>
+                    END
+                    <p>After viewing, the window with the code should be closed so as not to create obstacles to working
+                        with the resource resource tab on the Resource View tab.</p>
+                    <h2>File cube.def</h2>
+                    <p>The cube.def file is generated by the assistant. It contains the name of the dll file and the
+                        types
+                        of definitions used by the plug-in (book description, class number, class description, library
+                        version, initialization and library closure):</p>
+                    <p>LIBRARY cube.dlo
+                        <br>EXPORTS
+                    </p>
+                    <table border="0">
+                        <tbody>
+                            <tr>
+                                <td> LibDescription</td>
+                                <td> @1 PRIVATE</td>
+                            </tr>
+                            <tr>
+                                <td> LibNumberClasses</td>
+                                <td> @2 PRIVATE</td>
+                            </tr>
+                            <tr>
+                                <td> LibClassDesc</td>
+                                <td> @3 PRIVATE</td>
+                            </tr>
+                            <tr>
+                                <td> LibVersion</td>
+                                <td> @4 PRIVATE</td>
+                            </tr>
+                            <tr>
+                                <td> LibInitialize</td>
+                                <td> @6 PRIVATE</td>
+                            </tr>
+                            <tr>
+                                <td> LibShutdown</td>
+                                <td> @7 PRIVATE</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p>SECTIONS
+                        <br>.data READ WRITE
+                    </p>
+                    <p>When changing the properties of the library name project, the appropriate editing must be
+                        performed
+                        in a def-file.</p>
+                    <h2>Characteristics of Primitive</h2>
+                    <p>The cube created has the following features: </p>
+                    <ul>
+                        <li>class name in 3ds Max – Cube; </li>
+                        <li>the number of peaks is 8; </li>
+                        <li>the number of triangular faces - 12; </li>
+                        <li>has invisible diagonal ribs (if you take the side of the cube); </li>
+                        <li>the base point is located in the center of the cube; </li>
+                        <li>smoothing groups are formed by analogy with the box primitive; </li>
+                        <li>the material index of all facets is 1; </li>
+                        <li>has UVW coordinates; </li>
+                        <li>can be converted to Editable Mesh, Editable Poly or Editable Patch; </li>
+                        <li>can be replicated by all available methods (Copy, Instance or Reference); </li>
+                        <li>the object can be animated by its size (according to the Size parameter). </li>
+                    </ul>
+                    <h2>Plugin code cube.dlo</h2>
+                    <p>From the user's perspective, the code, in particular, must solve the following two tasks:</p>
+                    <ul>
+                        <li>create a cube of a given size after pressing the Create button; </li>
+                        <li>provide the introduction of a cube into the cube scene through the mouse. </li>
+                    </ul>
+                    <p>The helper-generated solution includes two source code-coded cPP files – DllEntry.cpp and
+                        cube.cpp.
+                        The first file contains a code that serves the dll library. This file in our case does not
+                        require
+                        changes:</p>
+                    <code>#include "cube.h"<br>
+extern ClassDesc2 *GetCubeDesc();<br>
+HINSTANCE hInstance;<br>
+// Функция DllMain вызывается Windows при загрузке DLL<br>
+// Также функция может вызываться во время таких операций,<br>
+// как воспроизведение изображения (Rendering)<br>
+BOOL WINAPI DllMain(HINSTANCE hinstDLL, ULONG fdwReason, LPVOID) {<br>
+&nbsp;if (fdwReason == DLL_PROCESS_ATTACH) {<br>
+&nbsp;&nbsp;hInstance = hinstDLL;<br>
+&nbsp;&nbsp;DisableThreadLibraryCalls(hInstance);<br>
+&nbsp;}<br>
+&nbsp;return TRUE;<br>
+}<br>
+// Возвращает строку с описанием DLL<br>
+__declspec( dllexport ) const TCHAR* LibDescription() {return GetString(IDS_LIBDESCRIPTION);}<br>
+// Возвращает число классов плагина<br>
+// В нашем случае DLL позволяет оперировать одним классом Cube<br>
+__declspec( dllexport ) int LibNumberClasses() {return 1;}<br>
+// Возвращает описание i-го класса плагина<br>
+__declspec( dllexport ) ClassDesc *LibClassDesc(int i) {<br>
+&nbsp;switch(i) {<br>
+&nbsp;&nbsp;case 0: return GetCubeDesc();<br>
+&nbsp;&nbsp;default: return 0;<br>
+&nbsp;}<br>
+}<br>
+__declspec( dllexport ) ULONG LibVersion() {return VERSION_3DSMAX;}<br>
+// Вызывается один раз при загрузке плагина в 3ds Max<br>
+// Если в качестве результата указать FALSE, то система не будет загружать плагин,<br>
+// а DLL будет интерпретироваться как свободная библиотека<br>
+__declspec( dllexport ) int LibInitialize(void) {return TRUE;}<br>
+// Вызывается один раз при выгрузке плагина из 3ds Max<br>
+// Возвращаемый результат приложением не используется<br>
+__declspec( dllexport ) int LibShutdown(void) {return TRUE;}<br>
+//<br>
+// Возвращает строку таблицы символов ресурса<br>
+TCHAR *GetString(int id) {<br>
+&nbsp;static TCHAR buf[256];<br>
+&nbsp;if (hInstance)<br>
+&nbsp;&nbsp;return LoadString(hInstance, id, buf, sizeof(buf)) ? buf : NULL;<br>
+&nbsp;return NULL;<br>
+}</code>
+                    <p>The main feature forms the DllMain hInstance, a signature descriptor of the plugin, transmitted
+                        to
+                        the cube.cpp file via the cube.h header file.
+                        <br>The names of the declspec-functions of the file are met by the definitions available in the
+                        def-file file.
+                        <br>The GetString function receives a value of the resource identifier and returns the value of
+                        the
+                        caption field of the symbol table (String Table) of the cube.rc resource.
+                        <br>The code that provides the functionality of the plugin is placed in the cube.cpp file.
+                        <br>The code is figuringfully formed by the assistant and includes a set of classes and
+                        functions
+                        (methods) necessary for the creation and management of procedural objects. If necessary, the
+                        developer can add their classes and methods, as well as make changes that meet the project goals
+                        in
+                        the code provided by the assistant.
+                        <br>Since the 3dsmaxsdk_preinclude.h heading file has been deleted, the cube.cpp file should not
+                        be
+                        present #pragma message.
+                        <br>The code contains the definitions of the following four classes:
+                    </p>
+                    <ul>
+                        <li>cube; </li>
+                        <li>cubeClassDesc; </li>
+                        <li>cubeBDlgProc; </li>
+                        <li>cubeCreateCalBack. </li>
+                    </ul>
+                    <p>Figures 20 and 21 show the hierarchies of classes that underlie the cube and cubeClasDesc
+                        classes.
+                    </p>
+                    <img alt="" src="https://st.renderu.com/image/48552"
+                        style="height: initial; max-height: 455px; clear: both; margin-left: auto; margin-right: auto;">
+                    <p>Rice. 20. Cube class: the hierarchy of parental classes</p>
+                    <img alt="" src="https://st.renderu.com/image/48553"
+                        style="height: initial; max-height: 153px; clear: both; margin-left: auto; margin-right: auto;">
+                    <p>Rice. 21. CubeClassDesc class: parental class hierarchy</p>
+                    <p>The cube class provides the creation and management of primitive.
+                        <br>The class cubeClassDesc ensures the registration of the object in 3ds Max.
+                        <br>The cubeBDlgProc class is responsible for linking the plugin with the manual cube dialog:
+                        its
+                        DlgProc function registers the Click on the Create (IDC_CREATE) button and provides the creation
+                        of
+                        a predetermined size cube with the center at the beginning of the world coordinate system.
+                        <br>The cubeCreateCalBack class is responsible for entering the primitive scene by means of a
+                        mouse:
+                        its proc function receives information about mouse events – these are 3ds Max messages with
+                        MOUSE_POINT, MOUSE_MOVE and MOUSE_ABORT names and responds appropriately to these events. The
+                        SetObj
+                        class method is associated with a mixture with a cube.
+                        <br>Both functions (DlgProc and proc) use the BuildMesh cube method using the NonMouseCreate
+                        (IObjParam class) and InvalidateUI (PharmblockDesc2) methods.
+                        <br>For other explanations, see the comments to the code below. In this case, the comment is
+                        first
+                        followed, and then the commented code.
+                    </p>
+                    <code>#include "cube.h"<br>
+#define cube_CLASS_ID Class_ID(0xd667c5aa, 0xb65e9ddb)<br>
+#define PBLOCK_REF 0<br>
+class cube : public SimpleObject2 {<br>
+&nbsp;public:<br>
+&nbsp;&nbsp;// Ссылка на интерфейс<br>
+&nbsp;&nbsp;static IObjParam *ip;<br>
+&nbsp;&nbsp;// Флаг ручного (по кнопке Create) ввода примитива<br>
+&nbsp;&nbsp;static BOOL kbrdCreate;<br>
+&nbsp;&nbsp;// Из класса BaseObject<br>
+&nbsp;&nbsp;CreateMouseCallBack *GetCreateMouseCallBack();<br>
+&nbsp;&nbsp;// Из класса Object<br>
+&nbsp;&nbsp;BOOL HasUVW();<br>
+&nbsp;&nbsp;void SetGenUVW(BOOL sw); <br>
+&nbsp;&nbsp;int CanConvertToType(Class_ID obtype);<br>
+&nbsp;&nbsp;Object *ConvertToType(TimeValue t, Class_ID obtype);<br>
+&nbsp;&nbsp;void GetCollapseTypes(Tab&lt;Class_ID&gt; &amp;clist,Tab&lt;TSTR*&gt; &amp;nlist);<br>
+&nbsp;&nbsp;// Из класса GeomObject<br>
+&nbsp;&nbsp;int IntersectRay(TimeValue t, Ray &amp;ray, float &amp;at, Point3 &amp;norm);<br>
+&nbsp;&nbsp;// Возвращает структуру ObjectState<br>
+&nbsp;&nbsp;ObjectState Eval(TimeValue t) {return ObjectState(this);};<br>
+&nbsp;&nbsp;// Из класса Animatable<br>
+&nbsp;&nbsp;void BeginEditParams(IObjParam *ip, ULONG flags, Animatable *prev);<br>
+&nbsp;&nbsp;void EndEditParams(IObjParam *ip, ULONG flags, Animatable *next);<br>
+&nbsp;&nbsp;// Из класса SimpleObject<br>
+&nbsp;&nbsp;// Строит меш<br>
+&nbsp;&nbsp;void BuildMesh(TimeValue t);<br>
+&nbsp;&nbsp;// Проверяет корректность задания параметров объекта<br>
+&nbsp;&nbsp;BOOL OKtoDisplay(TimeValue t);<br>
+&nbsp;&nbsp;// Обновляет пользовательский интерфейс<br>
+&nbsp;&nbsp;void InvalidateUI();<br>
+&nbsp;&nbsp;// Загрузка и сохранение данных плагина<br>
+&nbsp;&nbsp;IOResult Load(ILoad *iload);<br>
+&nbsp;&nbsp;IOResult Save(ISave *isave);<br>
+&nbsp;&nbsp;// Из класса Animatable<br>
+&nbsp;&nbsp;Class_ID ClassID() {return cube_CLASS_ID;}<br>
+&nbsp;&nbsp;SClass_ID SuperClassID() {return GEOMOBJECT_CLASS_ID;}<br>
+&nbsp;&nbsp;void GetClassName(TSTR&amp; s) {s = GetString(IDS_CLASS_NAME);}<br>
+&nbsp;&nbsp;void DeleteThis() {delete this;}<br>
+&nbsp;&nbsp;//<br>
+&nbsp;&nbsp;RefTargetHandle Clone(RemapDir &amp;remap);<br>
+&nbsp;&nbsp;//<br>
+&nbsp;&nbsp;// Получает из таблицы символов имя класса<br>
+&nbsp;&nbsp;TCHAR *GetObjectName() {return GetString(IDS_CLASS_NAME);}<br>
+&nbsp;&nbsp;// Число блоков параметров<br>
+&nbsp;&nbsp;int NumParamBlocks() {return 1;}<br>
+&nbsp;&nbsp;// Возвращает блок параметров по его номеру<br>
+&nbsp;&nbsp;IParamBlock2 *GetParamBlock(int i) {return pblock2;}<br>
+&nbsp;&nbsp;// Возвращает блок параметров по его идентификатору<br>
+&nbsp;&nbsp;IParamBlock2 *GetParamBlockByID(BlockID id) {return (pblock2-&gt;ID() == id) ? pblock2 : NULL;}<br>
+&nbsp;&nbsp;// Конструктор / Деструктор<br>
+&nbsp;&nbsp;cube();<br>
+&nbsp;&nbsp;~cube();<br>
+};<br>
+class cubeClassDesc : public ClassDesc2 {<br>
+&nbsp;public:<br>
+&nbsp;&nbsp;int IsPublic() {return TRUE;}<br>
+&nbsp;&nbsp;void *Create(BOOL) {return new cube();}<br>
+&nbsp;&nbsp;const TCHAR *ClassName() {return GetString(IDS_CLASS_NAME);}<br>
+&nbsp;&nbsp;SClass_ID SuperClassID() {return GEOMOBJECT_CLASS_ID;}<br>
+&nbsp;&nbsp;Class_ID ClassID() {return cube_CLASS_ID;}<br>
+&nbsp;&nbsp;const TCHAR *Category() {return GetString(IDS_CATEGORY);}<br>
+&nbsp;&nbsp;const TCHAR *InternalName() {return _T("cube");}<br>
+&nbsp;&nbsp;HINSTANCE HInstance() {return hInstance;}<br>
+};<br>
+static cubeClassDesc cubeDesc;<br>
+ClassDesc2 *GetCubeDesc() {return &amp;cubeDesc;}<br>
+// Имена диалогов IDD_KBRD и IDD_PARAMS<br>
+enum {cube_kbrd, cube_params};<br>
+// Имена ассоцируемые с упраляющими элементами диалогов<br>
+// Элементы IDC_KBSZ, IDC_KBSZSPIN<br>
+enum {cube_kb_size};<br>
+// Элементы IDC_SZ, IDC_SZSPIN<br>
+enum {cube_size};<br>
+// Блок параметров диалога IDD_KBRD<br>
+static ParamBlockDesc2 cube_kbrd_blk (cube_kbrd, _T("cubeKbrd"), 0, &amp;cubeDesc, P_CLASS_PARAMS + P_AUTO_UI,<br>
+&nbsp;IDD_KBRD, IDS_KBRD, BEGIN_EDIT_CREATE, APPENDROLL_CLOSED, NULL,<br>
+&nbsp;cube_kb_size, _T("kbSize"), TYPE_FLOAT, 0, IDS_CB_SIZE,<br>
+&nbsp;&nbsp;p_default, 40.0, p_range, 0.0f, 100.0f,<br>
+&nbsp;&nbsp;p_ui, TYPE_SPINNER, EDITTYPE_UNIVERSE, IDC_KBSZ, IDC_KBSZSPIN, 0.1f,<br>
+&nbsp;&nbsp;end, <br>
+&nbsp;end<br>
+);<br>
+// Блок параметров диалога IDD_PARAMS<br>
+static ParamBlockDesc2 cube_param_blk (cube_params, _T("params"), 0, &amp;cubeDesc, P_AUTO_CONSTRUCT + P_AUTO_UI, PBLOCK_REF,<br>
+&nbsp;IDD_PARAMS, IDS_PARAMS, 0, 0, NULL,<br>
+&nbsp;&nbsp;cube_size, _T("size"), TYPE_FLOAT, P_ANIMATABLE, IDS_CB_SIZE,<br>
+&nbsp;&nbsp;p_default, 0.0f, p_range, 0.0f, 100.0f,<br>
+&nbsp;&nbsp;p_ui, TYPE_SPINNER, EDITTYPE_UNIVERSE, IDC_SZ, IDC_SZSPIN, 0.1f,<br>
+&nbsp;&nbsp;end,<br>
+&nbsp;end<br>
+);<br>
+// Инициализация свойств ip и kbrdCreate класса cube<br>
+IObjParam *cube::ip = NULL;<br>
+BOOL cube::kbrdCreate = FALSE;<br>
+// Создаем диалог с P_AUTO_CONSTRUCT-блоком параметров<br>
+// Диалог IDD_KBRD будет создан при обращении cubeDesc.BeginEditParams<br>
+cube::cube() {cubeDesc.MakeAutoParamBlocks(this);}<br>
+cube::~cube() { }<br>
+IOResult cube::Load(ILoad *iload) {return IO_OK;}<br>
+IOResult cube::Save(ISave *isave) {return IO_OK;}<br>
+class cubeKBDlgProc : public ParamMap2UserDlgProc {<br>
+&nbsp;public:<br>
+&nbsp;&nbsp;cube *ob;<br>
+&nbsp;&nbsp;cubeKBDlgProc(cube *cb) {ob = cb;}<br>
+&nbsp;&nbsp;INT_PTR DlgProc(TimeValue t, IParamMap2 *map, HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);<br>
+&nbsp;&nbsp;void DeleteThis() {delete this;}<br>
+};<br>
+// Обеспечивает создание куба после нажатия на кнопку Create диалога IDD_KBRD<br>
+INT_PTR cubeKBDlgProc::DlgProc(TimeValue t, IParamMap2 *map, HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {<br>
+&nbsp;if (msg != WM_COMMAND) return FALSE;<br>
+&nbsp;if (LOWORD(wParam) != IDC_CREATE) return FALSE;<br>
+&nbsp;float cbSize = cube_kbrd_blk.GetFloat(cube_kb_size);<br>
+&nbsp;if (cbSize == 0.0) return TRUE;<br>
+&nbsp;// Устанавливаем IDC_SZ = IDC_KBSZ<br>
+&nbsp;if (ob-&gt;TestAFlag(A_OBJ_CREATING)) ob-&gt;pblock2-&gt;SetValue(cube_size, 0, cbSize);<br>
+&nbsp;// Флаг ручного ввода<br>
+&nbsp;ob-&gt;kbrdCreate = TRUE;<br>
+&nbsp;// Формируем единичную матрицу<br>
+&nbsp;Matrix3 tm(1);<br>
+&nbsp;// Устанавливаем в матрице порцию Translate (перемещение) аффинных преобразований<br>
+&nbsp;tm.SetTrans(Point3(0, 0, 0));<br>
+&nbsp;ob-&gt;suspendSnap = FALSE;<br>
+&nbsp;// Формируем куб<br>
+&nbsp;ob-&gt;ip-&gt;NonMouseCreate(tm);<br>
+&nbsp;return TRUE;<br>
+}<br>
+// Вызывается при создании очередного экземпляра куба (из класса Animatable)<br>
+void cube::BeginEditParams(IObjParam *ip,ULONG flags, Animatable *prev) {<br>
+&nbsp;SimpleObject::BeginEditParams(ip, flags, prev);<br>
+&nbsp;this-&gt;ip = ip;<br>
+&nbsp;if (kbrdCreate) {<br>
+&nbsp;&nbsp;// Если ранее был выполнен ручной ввод, то устанавливаем IDC_SZ = IDC_KBSZ<br>
+&nbsp;&nbsp;pblock2-&gt;SetValue(cube_size, 0, cube_kbrd_blk.GetFloat(cube_kb_size));<br>
+&nbsp;&nbsp;kbrdCreate = FALSE;<br>
+&nbsp;}<br>
+&nbsp;cubeDesc.BeginEditParams(ip, this, flags, prev);<br>
+&nbsp;// Фиксируем пользовательскую процедуру,<br>
+&nbsp;// ассоциированную с блоком параметров cube_kbrd_blk<br>
+&nbsp;cube_kbrd_blk.SetUserDlgProc(new cubeKBDlgProc(this));<br>
+}<br>
+void cube::EndEditParams(IObjParam *ip, ULONG flags, Animatable *next) {<br>
+&nbsp;SimpleObject::EndEditParams(ip, flags, next);<br>
+&nbsp;cubeDesc.EndEditParams(ip, this, flags, next);<br>
+&nbsp;// Плагин должен вызывать методы интерфейса ip только<br>
+&nbsp;// между BeginEditParams и EndEditParams<br>
+&nbsp;this-&gt;ip = NULL;<br>
+}<br>
+// Из класса Object<br>
+// Вернуть флаг наличия у объекта UVW-координат<br>
+BOOL cube::HasUVW() {return TRUE;}<br>
+// Можно модифицировать, исходя из целей проекта<br>
+void cube::SetGenUVW(BOOL sw) {if (sw == HasUVW()) return;}<br>
+// Класс обработки мышиных событий<br>
+class cubeCreateCallBack : public CreateMouseCallBack {<br>
+&nbsp;cube *ob;&nbsp;&nbsp;// Указатель на объект<br>
+&nbsp;Point3 p0;&nbsp;&nbsp;// Первая точка в мировой системе координат<br>
+&nbsp;Point3 p1;&nbsp;&nbsp;// Вторая точка в мировой системе координат<br>
+&nbsp;public:<br>
+&nbsp;&nbsp;int proc(ViewExp *vpt, int msg, int point, int flags, IPoint2 m, Matrix3 &amp;mat);<br>
+&nbsp;&nbsp;void SetObj(cube *cb) {ob = cb;}<br>
+};<br>
+int cubeCreateCallBack::proc(ViewExp *vpt, int msg, int point, int flags, IPoint2 m, Matrix3 &amp;mat){<br>
+&nbsp;if (msg == MOUSE_POINT || msg == MOUSE_MOVE) {<br>
+&nbsp;&nbsp;switch(point) {<br>
+&nbsp;&nbsp;&nbsp;case 0:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ob-&gt;suspendSnap = TRUE;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;// m - позиция мыши в оконных координатах<br>
+&nbsp;&nbsp;&nbsp;&nbsp;// p0 - позиция мыши в мировых координатах<br>
+&nbsp;&nbsp;&nbsp;&nbsp;p0 = vpt-&gt;SnapPoint(m, m, NULL, SNAP_IN_PLANE);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;// Порция Translate (перемещение) аффинных преобразований позиции<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mat.SetTrans(p0);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;// Изменяем значение параметра cube_size диалога IDD_PARAMS<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ob-&gt;pblock2-&gt;SetValue(cube_size, ob-&gt;ip-&gt;GetTime(), 0.0f);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;break;<br>
+&nbsp;&nbsp;&nbsp;case 1: {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ob-&gt;suspendSnap = TRUE;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;// p1 - новая позиция мыши в мировых координатах<br>
+&nbsp;&nbsp;&nbsp;&nbsp;p1 = vpt-&gt;SnapPoint(m, m, NULL, SNAP_IN_PLANE);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;// Управляем размером куба в зависимости от положения мыши<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ob-&gt;pblock2-&gt;SetValue(cube_size, ob-&gt;ip-&gt;GetTime(), 0.5f * Length(p1 - p0));<br>
+&nbsp;&nbsp;&nbsp;&nbsp;// Создаем и отображаем меш в видовом порте<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cube_param_blk.InvalidateUI();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;break;<br>
+&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;case 2:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return CREATE_STOP;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;}<br>
+&nbsp;else<br>
+&nbsp;&nbsp;if (msg == MOUSE_ABORT) return CREATE_ABORT;<br>
+&nbsp;return TRUE;<br>
+}<br>
+static cubeCreateCallBack cubeCreateCB;<br>
+CreateMouseCallBack *cube::GetCreateMouseCallBack() {<br>
+&nbsp;cubeCreateCB.SetObj(this);<br>
+&nbsp;return &amp;cubeCreateCB;<br>
+}<br>
+// Получает размер куба, строит его меш и формирует группы сглаживания<br>
+void cube::BuildMesh(TimeValue t) {<br>
+&nbsp;float size, h;<br>
+&nbsp;ivalid = FOREVER;<br>
+&nbsp;pblock2-&gt;GetValue(cube_size, t, size, ivalid);<br>
+&nbsp;h = 0.5 * size;<br>
+&nbsp;// Число вершин и граней в меш<br>
+&nbsp;mesh.setNumVerts(8);<br>
+&nbsp;mesh.setNumFaces(12);<br>
+&nbsp;// Координаты вершин<br>
+&nbsp;mesh.setVert(0, Point3(-h, -h, -h));<br>
+&nbsp;mesh.setVert(1, Point3(h, -h, -h));<br>
+&nbsp;mesh.setVert(2, Point3(-h, h, -h));<br>
+&nbsp;mesh.setVert(3, Point3(h, h, -h));<br>
+&nbsp;mesh.setVert(4, Point3(-h, -h, h));<br>
+&nbsp;mesh.setVert(5, Point3(h, -h, h));<br>
+&nbsp;mesh.setVert(6, Point3(-h, h, h));<br>
+&nbsp;mesh.setVert(7, Point3(h, h, h));<br>
+&nbsp;// Состав граней<br>
+&nbsp;mesh.faces[0].setVerts(0, 2, 3);<br>
+&nbsp;mesh.faces[1].setVerts(3, 1, 0);<br>
+&nbsp;mesh.faces[2].setVerts(4, 5, 7);<br>
+&nbsp;mesh.faces[3].setVerts(7, 6, 4);<br>
+&nbsp;mesh.faces[4].setVerts(0, 1, 5);<br>
+&nbsp;mesh.faces[5].setVerts(5, 4, 0);<br>
+&nbsp;mesh.faces[6].setVerts(1, 3, 7);<br>
+&nbsp;mesh.faces[7].setVerts(7, 5, 1);<br>
+&nbsp;mesh.faces[8].setVerts(3, 2, 6);<br>
+&nbsp;mesh.faces[9].setVerts(6, 7, 3);<br>
+&nbsp;mesh.faces[10].setVerts(2, 0, 4);<br>
+&nbsp;mesh.faces[11].setVerts(4, 6, 2);<br>
+&nbsp;// Группы сглаживания<br>
+&nbsp;mesh.faces[0].setSmGroup(2);<br>
+&nbsp;mesh.faces[1].setSmGroup(2);<br>
+&nbsp;mesh.faces[2].setSmGroup(4);<br>
+&nbsp;mesh.faces[3].setSmGroup(4);<br>
+&nbsp;mesh.faces[4].setSmGroup(8);<br>
+&nbsp;mesh.faces[5].setSmGroup(8);<br>
+&nbsp;mesh.faces[6].setSmGroup(16);<br>
+&nbsp;mesh.faces[7].setSmGroup(16);<br>
+&nbsp;mesh.faces[8].setSmGroup(32);<br>
+&nbsp;mesh.faces[9].setSmGroup(32);<br>
+&nbsp;mesh.faces[10].setSmGroup(64);<br>
+&nbsp;mesh.faces[11].setSmGroup(64);<br>
+&nbsp;// Устанавливаем видимость внешних ребер граней (диагональные ребра не видны)<br>
+&nbsp;for (int k = 0; k &lt; 12; k++) {<br>
+&nbsp;&nbsp;mesh.faces[k].setEdgeVisFlags(1, 1, 0);<br>
+&nbsp;&nbsp;mesh.faces[k].setMatID(1);<br>
+&nbsp;}<br>
+&nbsp;// Назначаем UVW-координаты<br>
+&nbsp;Matrix3 tm(1);<br>
+&nbsp;tm.Scale(Point3(h, h, h));<br>
+&nbsp;tm = Inverse(tm);<br>
+&nbsp;mesh.ApplyUVWMap(MAP_BOX, 1.0f, 1.0f, 1.0f, 0, 0, 0, 0, tm);<br>
+&nbsp;mesh.InvalidateTopologyCache();<br>
+}<br>
+// Добавлен код проверки корректности параметра size<br>
+BOOL cube::OKtoDisplay(TimeValue t) {<br>
+&nbsp;float size;<br>
+&nbsp;pblock2-&gt;GetValue(cube_size, t, size, FOREVER);<br>
+&nbsp;return (size &lt;= 0.0f) ? FALSE : TRUE;<br>
+}<br>
+void cube::InvalidateUI() {cube_param_blk.InvalidateUI(pblock2-&gt;LastNotifyParamID());}<br>
+// Находит точку пересечения луча ray с поверхностью (см. класс Ray)<br>
+// и нормаль к поверхности в этой точке<br>
+int cube::IntersectRay(TimeValue t, Ray &amp;ray, float &amp;at, Point3 &amp;norm) {<br>
+&nbsp;return SimpleObject::IntersectRay(t, ray, at, norm);<br>
+}<br>
+// Методы, обеспечивающие преобразование и копирование объекта<br>
+Object* cube::ConvertToType(TimeValue t, Class_ID obtype) {<br>
+&nbsp;return SimpleObject::ConvertToType(t, obtype);<br>
+}<br>
+int cube::CanConvertToType(Class_ID obtype) {<br>
+&nbsp;if (obtype == defObjectClassID || obtype == triObjectClassID)<br>
+&nbsp;&nbsp;return 1;<br>
+&nbsp;else<br>
+&nbsp;&nbsp;return SimpleObject::CanConvertToType(obtype);<br>
+}<br>
+void cube::GetCollapseTypes(Tab&lt;Class_ID&gt; &amp;clist, Tab&lt;TSTR*&gt; &amp;nlist) {<br>
+&nbsp;Object::GetCollapseTypes(clist, nlist);<br>
+}<br>
+RefTargetHandle cube::Clone(RemapDir &amp;remap) {<br>
+&nbsp;cube *newob = new cube();<br>
+&nbsp;newob-&gt;ReplaceReference(0, remap.CloneRef(pblock2));<br>
+&nbsp;newob-&gt;ivalid.SetEmpty();<br>
+&nbsp;BaseClone(this, newob, remap);<br>
+&nbsp;return newob;<br>
+}</code>
+                    <p>The above code can be copied to the Visual Studio project created by the assistant. In this case,
+                        you
+                        should copy the codes of both files – both DllEntry.cpp and cube.cpp.
+                        <br>After the settings of the properties of the project and the creation of the dialogues, built
+                        on
+                        the basis of this code<a href="http://render.ru/images/uploads/Image/Tutor/max/431/cube.rar">,
+                            the
+                            dll-library</a> must provide the functionality described in the lesson.
+                        <br>The construction of DLL is carried out after clicking on F7 (under Build - Build Solution).
+                    </p>
+                    <h2>Download and call plugin</h2>
+                    <p>The created plugin, the cube.dlo file should be downloaded at the beginning of the session with
+                        3ds
+                        Max, opening the Customize menu – Plug-in Manager – tabular part of the dialog – right mouse
+                        button
+                        – Load New Plug-in – find the downloadable file.
+                        <br>The downloaded plugin is available in the command window: Create – Geometry – SDK simple
+                        object.
+                        22).
+                    </p>
+                    <img alt="" src="https://st.renderu.com/image/48554"
+                        style="height: initial; max-height: 251px; clear: both; margin-left: auto; margin-right: auto;">
+                    <p>Rice. 22. Calling the Cube plugin</p>
+                    <p>If you download the plugin not at the beginning of the session, but later, then the error
+                        specified
+                        in Fig. 23 may occur.</p>
+                    <img alt="" src="https://st.renderu.com/image/48555"
+                        style="height: initial; max-height: 126px; clear: both; margin-left: auto; margin-right: auto;">
+                    <p>Rice. 23. Initialization of the plugin</p>
+                    <h2>Conclusion</h2>
+                    <p>Creating an additional 3ds Max tool is a rather time-consuming job. Therefore, there must be a
+                        serious motivation to implement it. For example, the presence of an idea of expanding the
+                        functionality of 3ds Max, interesting to a wide range of users of the application. A good
+                        extension
+                        could be</p>
+                </div>
+            </div>
+            <!-- end ngIf: !$state.current.data.edit --><!-- ngIf: $state.current.data.edit --><!-- ngIf: !$state.current.data.edit && blog_post_ctrl.post.pages && blog_post_ctrl.post.pages.length > 1 -->
+        </div>
+    </div>
+
+    </div>
+</body>
+
+</html>
